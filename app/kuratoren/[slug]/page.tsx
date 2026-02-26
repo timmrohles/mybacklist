@@ -1,5 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 async function getCurator(slug: string) {
   const sql = neon(process.env.DATABASE_URL!);
@@ -47,6 +48,31 @@ async function getCurationBooks(curatorId: number) {
     ORDER BY b.id, cb.sort_order
     LIMIT 24
   `;
+}
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const curator = await getCurator(slug);
+  if (!curator) return { title: "Kurator nicht gefunden | The Backlist Club" };
+
+  const title = `${curator.name} – Kurator | The Backlist Club`;
+  const description = curator.bio
+    ? (curator.bio as string).slice(0, 160)
+    : `Buchempfehlungen von ${curator.name} auf The Backlist Club.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: (curator.avatar_url as string)?.startsWith("http")
+        ? [{ url: curator.avatar_url as string }]
+        : [],
+    },
+  };
 }
 
 function avatarSrc(url: string | null): string | null {

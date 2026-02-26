@@ -1,5 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 async function getBook(id: string) {
   const sql = neon(process.env.DATABASE_URL!);
@@ -36,6 +37,32 @@ function buildAffiliateUrl(template: string, isbn13: string) {
   return template.replace("{isbn13}", isbn13);
 }
 
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> }
+): Promise<Metadata> {
+  const { id } = await params;
+  const book = await getBook(id);
+  if (!book) return { title: "Buch nicht gefunden | The Backlist Club" };
+
+  const author = formatAuthor(book.author as string | null);
+  const title = author
+    ? `${book.title} – ${author} | The Backlist Club`
+    : `${book.title} | The Backlist Club`;
+  const description = book.description
+    ? (book.description as string).slice(0, 160)
+    : `${book.title} – Buchempfehlung auf The Backlist Club.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: book.cover_url ? [{ url: book.cover_url as string }] : [],
+    },
+  };
+}
+
 export default async function BookPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [book, affiliates] = await Promise.all([getBook(id), getAffiliates()]);
@@ -44,8 +71,29 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
 
   const author = formatAuthor(book.author as string | null);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    name: book.title,
+    author: author ? { "@type": "Person", name: author } : undefined,
+    isbn: book.isbn13,
+    publisher: book.publisher ? { "@type": "Organization", name: book.publisher } : undefined,
+    image: book.cover_url ?? undefined,
+    description: book.description ?? undefined,
+    inLanguage: book.language ?? "de",
+    offers: {
+      "@type": "Offer",
+      availability: "https://schema.org/InStock",
+      priceCurrency: "EUR",
+    },
+  };
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--color-background)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Header */}
       <header style={{

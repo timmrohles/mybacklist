@@ -1,5 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 async function getTag(slug: string) {
   const sql = neon(process.env.DATABASE_URL!);
@@ -38,6 +39,22 @@ function formatAuthor(raw: string | null) {
   if (!raw) return null;
   const parts = raw.split(",").map((s) => s.trim());
   return parts.length === 2 ? `${parts[1]} ${parts[0]}` : raw;
+}
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const tag = await getTag(slug);
+  if (!tag) return { title: "Thema nicht gefunden | The Backlist Club" };
+
+  const count = tag.book_count as number;
+  const title = `${tag.name} – Buchempfehlungen | The Backlist Club`;
+  const description = count > 0
+    ? `${count.toLocaleString("de-DE")} handverlesene Bücher zum Thema ${tag.name} – entdecke Empfehlungen auf The Backlist Club.`
+    : `Buchempfehlungen zum Thema ${tag.name} auf The Backlist Club.`;
+
+  return { title, description, openGraph: { title, description } };
 }
 
 const tagTypeLabel: Record<string, string> = {
