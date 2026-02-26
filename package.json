@@ -23,5 +23,6 @@
     "tailwindcss": "^4",
     "@tailwindcss/postcss": "^4",
     "drizzle-kit": "^0.31.8"
-  }
+  },
+  "packageManager": "pnpm@10.0.0"
 }
