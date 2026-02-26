@@ -1,4 +1,13 @@
+import Image from "next/image";
 import { neon } from "@neondatabase/serverless";
+import type { Metadata } from "next";
+import SiteHeader from "../components/SiteHeader";
+import SiteFooter from "../components/SiteFooter";
+
+export const metadata: Metadata = {
+  title: "Kuratoren",
+  description: "Echte Menschen mit echten Leseempfehlungen – die Kuratoren von The Backlist Club.",
+};
 
 async function getCurators() {
   const sql = neon(process.env.DATABASE_URL!);
@@ -10,43 +19,14 @@ async function getCurators() {
   `;
 }
 
-function avatarSrc(url: string | null): string | null {
-  if (!url) return null;
-  if (url.startsWith("http")) return url;
-  // relative upload paths — not available in new app
-  return null;
-}
-
 export default async function KuratorenPage() {
   const curators = await getCurators();
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "var(--color-background)" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--color-background)", display: "flex", flexDirection: "column" }}>
+      <SiteHeader active="kuratoren" />
 
-      {/* Header */}
-      <header style={{ borderBottom: "1px solid var(--color-border)", padding: "0 var(--space-6)" }}>
-        <div style={{
-          maxWidth: "var(--max-width)", margin: "0 auto",
-          display: "flex", alignItems: "center", justifyContent: "space-between", height: "56px",
-        }}>
-          <a href="/" style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--color-text)", letterSpacing: "-0.02em" }}>
-            The Backlist Club
-          </a>
-          <nav style={{ display: "flex", gap: "var(--space-6)" }}>
-            {[["Themen", "/themen"], ["Kuratoren", "/kuratoren"]].map(([label, href]) => (
-              <a key={href} href={href} style={{
-                fontSize: "var(--text-sm)",
-                color: href === "/kuratoren" ? "var(--color-text)" : "var(--color-text-muted)",
-              }}>
-                {label}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "var(--space-12) var(--space-6) var(--space-10)" }}>
+      <section style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "var(--space-12) var(--space-6) var(--space-10)", width: "100%" }}>
         <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "var(--space-3)" }}>
           Menschen hinter den Empfehlungen
         </p>
@@ -58,71 +38,33 @@ export default async function KuratorenPage() {
         </p>
       </section>
 
-      {/* Curator Grid */}
-      <main style={{
-        maxWidth: "var(--max-width)", margin: "0 auto",
-        padding: "0 var(--space-6) var(--space-20)",
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-        gap: "var(--space-6)",
-      }}>
+      <main style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "0 var(--space-6) var(--space-12)", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--space-6)", flex: 1, width: "100%", alignContent: "start" }}>
         {curators.map((c: any) => {
-          const avatar = avatarSrc(c.avatar_url);
+          const avatarUrl = (c.avatar_url as string)?.startsWith("http") ? c.avatar_url as string : null;
           return (
-            <a
-              key={c.id}
-              href={`/kuratoren/${c.slug}`}
-              style={{
-                display: "block",
-                backgroundColor: "var(--color-surface)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-lg)",
-                padding: "var(--space-6)",
-                textDecoration: "none",
-                transition: "border-color 0.15s",
-              }}
-              className="curator-card"
-            >
+            <a key={c.id} href={`/kuratoren/${c.slug}`} style={{ display: "block", backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)", textDecoration: "none", transition: "border-color 0.15s" }} className="curator-card">
               <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", marginBottom: "var(--space-4)" }}>
-                {/* Avatar */}
-                <div style={{
-                  width: "56px", height: "56px", borderRadius: "50%", flexShrink: 0,
-                  backgroundColor: "var(--color-border-muted)",
-                  overflow: "hidden",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  {avatar ? (
-                    <img src={avatar} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <div style={{ width: "56px", height: "56px", borderRadius: "50%", flexShrink: 0, backgroundColor: "var(--color-border-muted)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                  {avatarUrl ? (
+                    <Image src={avatarUrl} alt={c.name} fill sizes="56px" style={{ objectFit: "cover" }} />
                   ) : (
-                    <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--color-text-muted)" }}>
-                      {(c.name as string).charAt(0)}
-                    </span>
+                    <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--color-text-muted)" }}>{(c.name as string).charAt(0)}</span>
                   )}
                 </div>
                 <div>
-                  <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--color-text)", marginBottom: "2px" }}>
-                    {c.name as string}
-                  </p>
-                  {c.focus && (
-                    <p style={{ fontSize: "var(--text-xs)", color: "var(--color-accent)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                      {c.focus as string}
-                    </p>
-                  )}
+                  <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--color-text)", marginBottom: "2px" }}>{c.name as string}</p>
+                  {c.focus && <p style={{ fontSize: "var(--text-xs)", color: "var(--color-accent)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{c.focus as string}</p>}
                 </div>
               </div>
               {c.bio && (
-                <p style={{
-                  fontSize: "var(--text-sm)", color: "var(--color-text-muted)", lineHeight: 1.6,
-                  display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
-                }}>
-                  {c.bio as string}
-                </p>
+                <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{c.bio as string}</p>
               )}
             </a>
           );
         })}
       </main>
 
+      <SiteFooter />
       <style>{`.curator-card:hover { border-color: var(--color-text-muted) !important; }`}</style>
     </div>
   );

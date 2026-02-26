@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import ClientLayout from "./components/ClientLayout";
 
 export const metadata: Metadata = {
   title: {
@@ -14,14 +15,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="de">
+      <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <ClientLayout>{children}</ClientLayout>
+      </body>
     </html>
   );
 }
