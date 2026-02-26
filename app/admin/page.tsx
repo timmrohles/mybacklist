@@ -1,13 +1,19 @@
 import { neon } from "@neondatabase/serverless";
 
+export const dynamic = "force-dynamic";
+
 async function getStats() {
-  const sql = neon(process.env.DATABASE_URL!);
-  const [books] = await sql`SELECT COUNT(*)::int FROM books WHERE deleted_at IS NULL AND (isbn13 LIKE '978%' OR isbn13 LIKE '979%')`;
-  const [featured] = await sql`SELECT COUNT(*)::int FROM books WHERE deleted_at IS NULL AND is_featured = true`;
-  const [tags] = await sql`SELECT COUNT(*)::int FROM tags WHERE deleted_at IS NULL`;
-  const [affiliates] = await sql`SELECT COUNT(*)::int FROM affiliates WHERE deleted_at IS NULL AND is_active = true`;
-  const [curators] = await sql`SELECT COUNT(*)::int FROM curators WHERE deleted_at IS NULL AND visible = true`;
-  return { books: books.count, featured: featured.count, tags: tags.count, affiliates: affiliates.count, curators: curators.count };
+  try {
+    const sql = neon(process.env.DATABASE_URL!);
+    const [books] = await sql`SELECT COUNT(*)::int FROM books WHERE deleted_at IS NULL AND (isbn13 LIKE '978%' OR isbn13 LIKE '979%')`;
+    const [featured] = await sql`SELECT COUNT(*)::int FROM books WHERE deleted_at IS NULL AND is_featured = true`;
+    const [tags] = await sql`SELECT COUNT(*)::int FROM tags WHERE deleted_at IS NULL`;
+    const [affiliates] = await sql`SELECT COUNT(*)::int FROM affiliates WHERE deleted_at IS NULL AND is_active = true`;
+    const [curators] = await sql`SELECT COUNT(*)::int FROM curators WHERE deleted_at IS NULL AND visible = true`;
+    return { books: books.count, featured: featured.count, tags: tags.count, affiliates: affiliates.count, curators: curators.count };
+  } catch {
+    return { books: 0, featured: 0, tags: 0, affiliates: 0, curators: 0 };
+  }
 }
 
 export default async function AdminPage() {
