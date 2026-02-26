@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 async function getFeaturedBooks() {
   try {
     const result = await db.execute(
-      sql`SELECT id, title, author, cover_url, slug FROM books LIMIT 12`
+      sql`SELECT id::text, title, author, cover_url FROM books WHERE deleted_at IS NULL LIMIT 12`
     );
     return result.rows;
   } catch (error) {
@@ -44,14 +44,11 @@ export default async function Home() {
           Aktuelle Empfehlungen
         </h3>
         {books.length === 0 ? (
-          <div>
-            <p className="text-gray-400 text-sm">Noch keine Bücher vorhanden.</p>
-            <p className="text-gray-300 text-xs mt-2">DB rows: {String(books.length)}</p>
-          </div>
+          <p className="text-gray-400 text-sm">Verbindung wird aufgebaut...</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {books.map((book: any) => (
-              <a key={book.id} href={`/buch/${book.slug || book.id}`} className="group">
+              <a key={book.id} href={`/buch/${book.id}`} className="group">
                 <div className="aspect-[2/3] bg-gray-100 rounded overflow-hidden mb-2">
                   {book.cover_url ? (
                     <img
@@ -61,7 +58,7 @@ export default async function Home() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center p-2">
-                      <p className="text-xs text-gray-400 text-center">{book.title}</p>
+                      <p className="text-xs text-gray-400 text-center leading-tight">{book.title}</p>
                     </div>
                   )}
                 </div>
