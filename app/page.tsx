@@ -3,7 +3,7 @@ import { neon } from "@neondatabase/serverless";
 async function getFeaturedBooks() {
   try {
     const sql = neon(process.env.DATABASE_URL!);
-    const books = await sql`SELECT id::text, title, author, cover_url FROM books WHERE deleted_at IS NULL AND isbn13 IS NOT NULL AND isbn13 <> '' LIMIT 12`;
+    const books = await sql`SELECT id::text, title, author, cover_url FROM books WHERE deleted_at IS NULL AND (isbn13 LIKE '978%' OR isbn13 LIKE '979%') LIMIT 12`;
     return { books, error: null };
   } catch (error: any) {
     console.error("DB Error:", error.message);
