@@ -4,15 +4,15 @@ async function getFeaturedBooks() {
   try {
     const sql = neon(process.env.DATABASE_URL!);
     const books = await sql`SELECT id::text, title, author, cover_url FROM books WHERE deleted_at IS NULL AND isbn IS NOT NULL AND isbn != '' LIMIT 12`;
-    return books;
+    return { books, error: null };
   } catch (error: any) {
     console.error("DB Error:", error.message);
-    return [];
+    return { books: [], error: error.message as string };
   }
 }
 
 export default async function Home() {
-  const books = await getFeaturedBooks();
+  const { books, error } = await getFeaturedBooks();
 
   return (
     <main className="min-h-screen bg-white">
@@ -41,7 +41,9 @@ export default async function Home() {
         <h3 className="text-sm font-medium text-gray-400 uppercase tracking-widest mb-8">
           Aktuelle Empfehlungen
         </h3>
-        {books.length === 0 ? (
+        {error ? (
+          <p className="text-red-500 text-sm font-mono">DB-Fehler: {error}</p>
+        ) : books.length === 0 ? (
           <p className="text-gray-400 text-sm">Noch keine Bücher vorhanden.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
