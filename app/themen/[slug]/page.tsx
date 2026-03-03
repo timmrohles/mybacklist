@@ -1,10 +1,9 @@
 import Image from "next/image";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 async function getTag(slug: string) {
-  const sql = neon(process.env.DATABASE_URL!);
   const [tag] = await sql`
     SELECT t.id, t.name, t.slug, t.tag_type, t.description,
            COUNT(bt.book_id)::int AS book_count
@@ -17,7 +16,6 @@ async function getTag(slug: string) {
 }
 
 async function getBooksByTag(tagId: number) {
-  const sql = neon(process.env.DATABASE_URL!);
   return sql`
     SELECT b.id::text, b.title, b.author, b.cover_url
     FROM books b JOIN book_tags bt ON bt.book_id = b.id
@@ -63,42 +61,63 @@ export default async function TagPage({ params }: { params: Promise<{ slug: stri
 
   return (
     <>
-      <div style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "var(--space-4) var(--space-6) 0" }}>
-        <a href="/themen" style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>← Alle Themen</a>
+      <div className="max-w-6xl mx-auto px-6 pt-4">
+        <a href="/themen" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          ← Alle Themen
+        </a>
       </div>
 
-      <section style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "var(--space-8) var(--space-6) var(--space-10)" }}>
-        <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "var(--space-3)" }}>
-          {tagTypeLabel[tag.tag_type as string] ?? tag.tag_type as string}
+      <section className="max-w-6xl mx-auto px-6 py-8 pb-10">
+        <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-3">
+          {tagTypeLabel[tag.tag_type as string] ?? (tag.tag_type as string)}
         </p>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.75rem, 4vw, 2.5rem)", color: "var(--color-text)", marginBottom: "var(--space-3)" }}>{tag.name as string}</h1>
-        {tag.description && <p style={{ fontSize: "var(--text-lg)", color: "var(--color-text-muted)", maxWidth: "42rem", lineHeight: 1.65, marginBottom: "var(--space-3)" }}>{tag.description as string}</p>}
-        <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>
-          {(tag.book_count as number) > 0 ? `${(tag.book_count as number).toLocaleString("de-DE")} Bücher` : "Noch keine Bücher zugeordnet"}
+        <h1 className="font-serif text-[clamp(1.75rem,4vw,2.5rem)] text-foreground mb-3">
+          {tag.name as string}
+        </h1>
+        {tag.description && (
+          <p className="text-lg text-muted-foreground max-w-[42rem] leading-[1.65] mb-3">
+            {tag.description as string}
+          </p>
+        )}
+        <p className="text-sm text-muted-foreground">
+          {(tag.book_count as number) > 0
+            ? `${(tag.book_count as number).toLocaleString("de-DE")} Bücher`
+            : "Noch keine Bücher zugeordnet"}
         </p>
       </section>
 
-      <section style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "0 var(--space-6) var(--space-20)" }}>
+      <section className="max-w-6xl mx-auto px-6 pb-20">
         {books.length === 0 ? (
-          <div style={{ padding: "var(--space-16) 0", textAlign: "center" }}>
-            <p style={{ color: "var(--color-text-subtle)" }}>Für dieses Thema sind noch keine Bücher verfügbar.</p>
-            <a href="/" style={{ display: "inline-block", marginTop: "var(--space-4)", fontSize: "var(--text-sm)", color: "var(--color-accent)" }}>Zur Startseite</a>
+          <div className="py-16 text-center">
+            <p className="text-muted-foreground">Für dieses Thema sind noch keine Bücher verfügbar.</p>
+            <a href="/" className="inline-block mt-4 text-sm text-primary hover:underline">
+              Zur Startseite
+            </a>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "var(--space-6)" }}>
+          <div className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
             {books.map((book: any) => (
-              <a key={book.id} href={`/buch/${book.id}`} style={{ display: "block", textDecoration: "none" }} className="book-card">
-                <div style={{ position: "relative", aspectRatio: "2/3", backgroundColor: "var(--color-border-muted)", borderRadius: "var(--radius)", overflow: "hidden", marginBottom: "var(--space-2)", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
-                  <Image src={book.cover_url} alt={book.title} fill sizes="(max-width: 640px) 45vw, 160px" style={{ objectFit: "cover", transition: "transform 0.3s ease" }} className="book-cover-img" />
+              <a key={book.id} href={`/buch/${book.id}`} className="block group">
+                <div className="relative aspect-[2/3] bg-muted rounded-lg overflow-hidden mb-2 shadow-sm">
+                  <Image
+                    src={book.cover_url}
+                    alt={book.title}
+                    fill
+                    sizes="(max-width: 640px) 45vw, 160px"
+                    className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                  />
                 </div>
-                <p style={{ fontSize: "var(--text-xs)", fontWeight: 500, color: "var(--color-text)", lineHeight: 1.35, marginBottom: "var(--space-1)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{book.title}</p>
-                {book.author && <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)" }}>{formatAuthor(book.author)}</p>}
+                <p className="text-xs font-medium text-foreground leading-snug mb-1 line-clamp-2">
+                  {book.title}
+                </p>
+                {book.author && (
+                  <p className="text-xs text-muted-foreground">{formatAuthor(book.author)}</p>
+                )}
               </a>
             ))}
           </div>
         )}
       </section>
-      <style>{`.book-card:hover .book-cover-img { transform: scale(1.04); }`}</style>
     </>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 function LoginForm() {
   const [password, setPassword] = useState("");
@@ -32,23 +33,21 @@ function LoginForm() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--color-background)" }}>
-      <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "360px", padding: "var(--space-8)", backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-lg)" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-2xl)", color: "var(--color-text)", marginBottom: "var(--space-6)" }}>
-          Admin
-        </h1>
-        <input
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <form onSubmit={handleSubmit} className="w-full max-w-[360px] p-8 bg-card border border-border rounded-xl">
+        <h1 className="font-serif text-2xl text-foreground mb-6">Admin</h1>
+        <Input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Passwort"
           autoFocus
-          style={{ width: "100%", padding: "var(--space-3) var(--space-4)", border: "1px solid var(--color-border)", borderRadius: "var(--radius)", fontSize: "var(--text-base)", backgroundColor: "var(--color-background)", color: "var(--color-text)", marginBottom: "var(--space-4)", boxSizing: "border-box" }}
+          className="mb-4"
         />
-        {error && <p style={{ color: "var(--color-accent)", fontSize: "var(--text-sm)", marginBottom: "var(--space-3)" }}>{error}</p>}
-        <button type="submit" disabled={loading} style={{ width: "100%", padding: "var(--space-3)", backgroundColor: "var(--color-text)", color: "var(--color-surface)", border: "none", borderRadius: "var(--radius)", fontSize: "var(--text-base)", fontFamily: "var(--font-body)", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}>
+        {error && <p className="text-sm text-destructive mb-3">{error}</p>}
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? "…" : "Anmelden"}
-        </button>
+        </Button>
       </form>
     </div>
   );

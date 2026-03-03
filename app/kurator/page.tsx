@@ -1,60 +1,47 @@
-import { neon } from "@neondatabase/serverless";
+import Image from "next/image";
+import { sql } from "@/lib/db";
 
-// Timm's curator slug – update here if it changes in DB
 const MY_CURATOR_SLUG = "timm-rohles-2";
 
 async function getMyCurator() {
-  const sql = neon(process.env.DATABASE_URL!);
   const [curator] = await sql`
     SELECT id, name, slug, bio, avatar_url, focus, website_url, instagram_url, podcast_url
     FROM curators
-    WHERE slug = ${MY_CURATOR_SLUG}
-      AND deleted_at IS NULL
+    WHERE slug = ${MY_CURATOR_SLUG} AND deleted_at IS NULL
     LIMIT 1
   `;
   return curator ?? null;
 }
 
 async function getMyCurationBooks(curatorId: number) {
-  const sql = neon(process.env.DATABASE_URL!);
-  // First try: books from curations
   const curationBooks = await sql`
-    SELECT DISTINCT ON (b.id)
-      b.id::text, b.title, b.author, b.cover_url
+    SELECT DISTINCT ON (b.id) b.id::text, b.title, b.author, b.cover_url
     FROM books b
     JOIN curation_books cb ON cb.book_id = b.id
     JOIN curations cu ON cu.id = cb.curation_id
     WHERE cu.curator_id = ${curatorId}
-      AND cb.deleted_at IS NULL
-      AND cu.deleted_at IS NULL
-      AND b.deleted_at IS NULL
+      AND cb.deleted_at IS NULL AND cu.deleted_at IS NULL AND b.deleted_at IS NULL
       AND (b.isbn13 LIKE '978%' OR b.isbn13 LIKE '979%')
       AND b.cover_url IS NOT NULL AND b.cover_url <> ''
-    ORDER BY b.id, cb.sort_order
-    LIMIT 24
+    ORDER BY b.id, cb.sort_order LIMIT 24
   `;
   if (curationBooks.length > 0) return curationBooks;
 
-  // Fallback: top books by score
   return sql`
     SELECT id::text, title, author, cover_url
     FROM books
     WHERE deleted_at IS NULL
       AND (isbn13 LIKE '978%' OR isbn13 LIKE '979%')
       AND cover_url IS NOT NULL AND cover_url <> ''
-    ORDER BY total_score DESC
-    LIMIT 24
+    ORDER BY total_score DESC LIMIT 24
   `;
 }
 
 async function getMyCurations(curatorId: number) {
-  const sql = neon(process.env.DATABASE_URL!);
   return sql`
     SELECT id, title, rationale, status
     FROM curations
-    WHERE curator_id = ${curatorId}
-      AND deleted_at IS NULL
-      AND status = 'published'
+    WHERE curator_id = ${curatorId} AND deleted_at IS NULL AND status = 'published'
     ORDER BY sort_order, created_at
   `;
 }
@@ -75,8 +62,8 @@ export default async function KuratorPage() {
 
   if (!curator) {
     return (
-      <div style={{ padding: "var(--space-20)", textAlign: "center" }}>
-        <p style={{ color: "var(--color-text-subtle)" }}>Kurator-Profil nicht gefunden.</p>
+      <div className="py-20 text-center">
+        <p className="text-muted-foreground">Kurator-Profil nicht gefunden.</p>
       </div>
     );
   }
@@ -87,109 +74,73 @@ export default async function KuratorPage() {
   ]);
 
   const avatarUrl = (curator.avatar_url as string | null)?.startsWith("http")
-    ? curator.avatar_url as string
+    ? (curator.avatar_url as string)
     : null;
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "var(--color-background)" }}>
-
-      {/* Header */}
-      <header style={{ borderBottom: "1px solid var(--color-border)", padding: "0 var(--space-6)" }}>
-        <div style={{
-          maxWidth: "var(--max-width)", margin: "0 auto",
-          display: "flex", alignItems: "center", justifyContent: "space-between", height: "56px",
-        }}>
-          <a href="/" style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--color-text)", letterSpacing: "-0.02em" }}>
-            The Backlist Club
-          </a>
-          <nav style={{ display: "flex", gap: "var(--space-6)" }}>
-            {[["Themen", "/themen"], ["Kuratoren", "/kuratoren"]].map(([label, href]) => (
-              <a key={href} href={href} style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}>
-                {label}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </header>
-
-      {/* Profile */}
-      <section style={{
-        maxWidth: "var(--max-width)", margin: "0 auto",
-        padding: "var(--space-12) var(--space-6) var(--space-10)",
-        display: "grid", gridTemplateColumns: "auto 1fr",
-        gap: "var(--space-8)", alignItems: "start",
-      }} className="kurator-header">
-
-        {/* Avatar */}
-        <div style={{
-          width: "120px", height: "120px", borderRadius: "50%",
-          backgroundColor: "var(--color-border-muted)",
-          overflow: "hidden", flexShrink: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
-        }}>
+    <>
+      <section className="max-w-6xl mx-auto px-6 py-12 pb-10 grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-8 items-start">
+        <div className="relative w-28 h-28 rounded-full bg-muted overflow-hidden shrink-0 shadow-md flex items-center justify-center">
           {avatarUrl ? (
-            <img src={avatarUrl} alt={curator.name as string} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <Image src={avatarUrl} alt={curator.name as string} fill sizes="120px" className="object-cover" />
           ) : (
-            <span style={{ fontFamily: "var(--font-display)", fontSize: "3rem", color: "var(--color-text-muted)" }}>
+            <span className="font-serif text-5xl text-muted-foreground">
               {(curator.name as string).charAt(0)}
             </span>
           )}
         </div>
 
-        {/* Info */}
         <div>
           {curator.focus && (
-            <p style={{ fontSize: "var(--text-xs)", color: "var(--color-accent)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "var(--space-2)" }}>
+            <p className="text-xs text-primary uppercase tracking-[0.1em] mb-2">
               {curator.focus as string}
             </p>
           )}
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.75rem, 4vw, 2.5rem)", color: "var(--color-text)", marginBottom: "var(--space-3)" }}>
+          <h1 className="font-serif text-[clamp(1.75rem,4vw,2.5rem)] text-foreground mb-3">
             {curator.name as string}
           </h1>
           {curator.bio && curator.bio !== "Lorem ipsum" && curator.bio !== "Mein Bücherstore" && (
-            <p style={{ fontSize: "var(--text-base)", color: "var(--color-text-muted)", lineHeight: 1.75, maxWidth: "54ch", marginBottom: "var(--space-4)" }}>
+            <p className="text-base text-muted-foreground leading-[1.75] max-w-[54ch] mb-4">
               {curator.bio as string}
             </p>
           )}
-          <div style={{ display: "flex", gap: "var(--space-4)", flexWrap: "wrap" }}>
+          <div className="flex gap-4 flex-wrap">
             {curator.website_url && !["www", "", null].includes(curator.website_url as string) && (
               <a href={curator.website_url as string} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>Website ↗</a>
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Website ↗
+              </a>
             )}
             {curator.instagram_url && !["e", "", null].includes(curator.instagram_url as string) && (
               <a href={curator.instagram_url as string} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>Instagram ↗</a>
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Instagram ↗
+              </a>
             )}
             {curator.podcast_url && (
               <a href={curator.podcast_url as string} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>Podcast ↗</a>
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Podcast ↗
+              </a>
             )}
           </div>
         </div>
       </section>
 
-      <main style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "0 var(--space-6) var(--space-20)" }}>
-
-        {/* Curations */}
+      <main className="max-w-6xl mx-auto px-6 pb-20">
         {curations.length > 0 && (
-          <section style={{ marginBottom: "var(--space-12)" }}>
-            <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "var(--space-6)" }}>
+          <section className="mb-12">
+            <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-6">
               Meine Listen
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+            <div className="flex flex-col gap-3">
               {curations.map((c: any) => (
-                <div key={c.id} style={{
-                  padding: "var(--space-4) var(--space-6)",
-                  backgroundColor: "var(--color-surface)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "var(--radius)",
-                }}>
-                  <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--color-text)", marginBottom: c.rationale ? "var(--space-1)" : 0 }}>
+                <div key={c.id} className="px-6 py-4 bg-card border border-border rounded-lg">
+                  <p className="font-serif text-lg text-foreground">
                     {c.title as string}
                   </p>
                   {c.rationale && (
-                    <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}>{c.rationale as string}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{c.rationale as string}</p>
                   )}
                 </div>
               ))}
@@ -197,44 +148,33 @@ export default async function KuratorPage() {
           </section>
         )}
 
-        {/* Books */}
         <section>
-          <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "var(--space-6)" }}>
+          <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-6">
             {curations.length > 0 ? "Empfohlene Bücher" : "Aktuelle Empfehlungen"}
           </p>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-            gap: "var(--space-6)",
-          }}>
+          <div className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(140px,1fr))]">
             {books.map((book: any) => (
-              <a key={book.id} href={`/buch/${book.id}`} style={{ display: "block", textDecoration: "none" }} className="book-card">
-                <div style={{
-                  aspectRatio: "2/3", backgroundColor: "var(--color-border-muted)",
-                  borderRadius: "var(--radius)", overflow: "hidden",
-                  marginBottom: "var(--space-2)", boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                }}>
-                  <img src={book.cover_url} alt={book.title} className="book-cover-img"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.3s ease" }}
+              <a key={book.id} href={`/buch/${book.id}`} className="block group">
+                <div className="relative aspect-[2/3] bg-muted rounded-lg overflow-hidden mb-2 shadow-sm">
+                  <Image
+                    src={book.cover_url}
+                    alt={book.title}
+                    fill
+                    sizes="160px"
+                    className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                   />
                 </div>
-                <p style={{ fontSize: "var(--text-xs)", fontWeight: 500, color: "var(--color-text)", lineHeight: 1.35, marginBottom: "var(--space-1)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                <p className="text-xs font-medium text-foreground leading-snug mb-1 line-clamp-2">
                   {book.title}
                 </p>
                 {book.author && (
-                  <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)" }}>
-                    {formatAuthor(book.author)}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{formatAuthor(book.author)}</p>
                 )}
               </a>
             ))}
           </div>
         </section>
       </main>
-
-      <style>{`.book-card:hover .book-cover-img { transform: scale(1.04); }
-        @media (max-width: 600px) { .kurator-header { grid-template-columns: 1fr !important; } }`}
-      </style>
-    </div>
+    </>
   );
 }

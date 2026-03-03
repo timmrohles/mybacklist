@@ -1,8 +1,7 @@
 import Image from "next/image";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
 async function getFeaturedBooks() {
-  const sql = neon(process.env.DATABASE_URL!);
   return sql`
     SELECT id::text, title, author, cover_url
     FROM books
@@ -25,50 +24,50 @@ export default async function Home() {
 
   return (
     <>
-      <section style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "var(--space-16) var(--space-6) var(--space-12)" }}>
-        <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "var(--space-4)" }}>
+      <section className="max-w-6xl mx-auto px-6 pt-16 pb-12">
+        <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-4">
           Persönliche Buchempfehlungen
         </p>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 5vw, 3rem)", color: "var(--color-text)", maxWidth: "32rem", marginBottom: "var(--space-4)" }}>
+        <h1 className="font-serif text-[clamp(2rem,5vw,3rem)] text-foreground max-w-[32rem] mb-4">
           Bücher die wirklich bleiben.
         </h1>
-        <p style={{ fontSize: "var(--text-lg)", color: "var(--color-text-muted)", maxWidth: "38rem", lineHeight: 1.65 }}>
+        <p className="text-lg text-muted-foreground max-w-[38rem] leading-[1.65]">
           Handverlesene Empfehlungen – keine Algorithmen, keine Bestsellerlisten.
           Nur Bücher die ich selbst gelesen und geliebt habe.
         </p>
       </section>
 
-      <section style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "0 var(--space-6) var(--space-20)" }}>
-        <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "var(--space-8)" }}>
+      <section className="max-w-6xl mx-auto px-6 pb-20">
+        <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-8">
           Aktuelle Empfehlungen
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "var(--space-6)" }}>
+        <div className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
           {books.map((book: any) => (
-            <a key={book.id} href={`/buch/${book.id}`} style={{ display: "block", textDecoration: "none" }} className="book-card">
-              <div style={{ position: "relative", aspectRatio: "2/3", backgroundColor: "var(--color-border-muted)", borderRadius: "var(--radius)", overflow: "hidden", marginBottom: "var(--space-2)", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
+            <a key={book.id} href={`/buch/${book.id}`} className="block group">
+              <div className="relative aspect-[2/3] bg-muted rounded-lg overflow-hidden mb-2 shadow-sm">
                 <Image
                   src={book.cover_url}
                   alt={book.title}
                   fill
                   sizes="(max-width: 480px) 42vw, (max-width: 1024px) 20vw, 160px"
-                  style={{ objectFit: "cover", transition: "transform 0.3s ease" }}
-                  className="book-cover-img"
+                  className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                 />
               </div>
-              <p style={{ fontSize: "var(--text-xs)", fontWeight: 500, color: "var(--color-text)", lineHeight: 1.35, marginBottom: "var(--space-1)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+              <p className="text-xs font-medium text-foreground leading-snug mb-1 line-clamp-2">
                 {book.title}
               </p>
               {book.author && (
-                <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)" }}>{formatAuthor(book.author)}</p>
+                <p className="text-xs text-muted-foreground">{formatAuthor(book.author)}</p>
               )}
             </a>
           ))}
         </div>
       </section>
-      <style>{`.book-card:hover .book-cover-img { transform: scale(1.04); }`}</style>
 
-      <div style={{ textAlign: "center", padding: "var(--space-8) var(--space-6)", borderTop: "1px solid var(--color-border-muted)" }}>
-        <a href="/admin" style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)" }}>Admin</a>
+      <div className="text-center py-8 px-6 border-t border-border/50">
+        <a href="/admin" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+          Admin
+        </a>
       </div>
     </>
   );

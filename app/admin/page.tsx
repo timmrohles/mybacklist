@@ -1,10 +1,9 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 async function getStats() {
   try {
-    const sql = neon(process.env.DATABASE_URL!);
     const [books] = await sql`SELECT COUNT(*)::int FROM books WHERE deleted_at IS NULL AND (isbn13 LIKE '978%' OR isbn13 LIKE '979%')`;
     const [tags] = await sql`SELECT COUNT(*)::int FROM tags WHERE deleted_at IS NULL`;
     const [affiliates] = await sql`SELECT COUNT(*)::int FROM affiliates WHERE deleted_at IS NULL AND is_active = true`;
@@ -34,27 +33,27 @@ export default async function AdminPage() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f4f4f0", padding: "var(--space-8) var(--space-6)" }}>
-      <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-8)" }}>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}>Admin Dashboard</h1>
-          <a href="/api/admin/logout" style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>Abmelden</a>
+    <div className="min-h-screen bg-background py-8 px-6">
+      <div className="max-w-[960px] mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="font-serif text-2xl text-foreground">Admin Dashboard</h1>
+          <a href="/api/admin/logout" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            Abmelden
+          </a>
         </div>
 
-        {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "var(--space-4)", marginBottom: "var(--space-8)" }}>
+        <div className="grid [grid-template-columns:repeat(auto-fill,minmax(160px,1fr))] gap-4 mb-8">
           {cards.map((card) => (
-            <div key={card.label} style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "var(--radius)", padding: "var(--space-4)" }}>
-              <p style={{ fontSize: "var(--text-2xl)", fontFamily: "var(--font-display)", color: "var(--color-text)", marginBottom: "var(--space-1)" }}>{card.value}</p>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)" }}>{card.label}</p>
-            </div>
+            <a key={card.label} href={card.href} className="block bg-card border border-border rounded-lg p-4 hover:border-primary/40 transition-colors">
+              <p className="font-serif text-2xl text-foreground mb-1">{card.value}</p>
+              <p className="text-xs text-muted-foreground">{card.label}</p>
+            </a>
           ))}
         </div>
 
-        {/* Nav */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+        <div className="flex flex-col gap-2">
           {links.map(([label, href]) => (
-            <a key={href} href={href} style={{ display: "block", padding: "var(--space-4) var(--space-6)", backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "var(--radius)", fontSize: "var(--text-base)", color: "var(--color-text)", textDecoration: "none" }}>
+            <a key={href} href={href} className="block px-6 py-4 bg-card border border-border rounded-lg text-base text-foreground hover:border-primary/40 transition-colors">
               {label}
             </a>
           ))}

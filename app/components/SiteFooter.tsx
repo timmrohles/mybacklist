@@ -1,27 +1,22 @@
 export default function SiteFooter() {
   return (
-    <footer style={{
-      borderTop: "1px solid var(--color-border)",
-      padding: "var(--space-8) var(--space-6)",
-      marginTop: "auto",
-    }}>
-      <div style={{
-        maxWidth: "var(--max-width)", margin: "0 auto",
-        display: "flex", flexWrap: "wrap",
-        justifyContent: "space-between", alignItems: "center",
-        gap: "var(--space-4)",
-      }}>
-        <span style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>
+    <footer className="border-t border-border py-8 px-6 mt-auto">
+      <div className="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
+        <span className="text-sm text-muted-foreground/60">
           © {new Date().getFullYear()} The Backlist Club
         </span>
-        <nav style={{ display: "flex", gap: "var(--space-6)", flexWrap: "wrap" }}>
+        <nav className="flex gap-6 flex-wrap">
           {[
             ["Kurator", "/kurator"],
             ["Impressum", "/impressum"],
             ["Datenschutz", "/datenschutz"],
             ["FAQ", "/faq"],
           ].map(([label, href]) => (
-            <a key={href} href={href} style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>
+            <a
+              key={href}
+              href={href}
+              className="text-sm text-muted-foreground/60 hover:text-foreground transition-colors"
+            >
               {label}
             </a>
           ))}

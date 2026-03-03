@@ -1,10 +1,11 @@
 import Image from "next/image";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 async function getBook(id: string) {
-  const sql = neon(process.env.DATABASE_URL!);
   const [book] = await sql`
     SELECT id::text, title, author, publisher, cover_url,
       description, price::text, isbn13, language, availability, is_indie
@@ -16,7 +17,6 @@ async function getBook(id: string) {
 }
 
 async function getAffiliates() {
-  const sql = neon(process.env.DATABASE_URL!);
   return sql`
     SELECT name, slug, link_template
     FROM affiliates
@@ -70,53 +70,82 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <div style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "var(--space-4) var(--space-6) 0" }}>
-        <a href="/" style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>← Alle Bücher</a>
+      <div className="max-w-6xl mx-auto px-6 pt-4">
+        <a href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          ← Alle Bücher
+        </a>
       </div>
 
-      <main style={{
-        maxWidth: "var(--max-width)", margin: "0 auto",
-        padding: "var(--space-8) var(--space-6) var(--space-16)",
-        display: "grid", gridTemplateColumns: "220px 1fr",
-        gap: "var(--space-12)", alignItems: "start",
-      }} className="book-detail-layout">
-
-        <div style={{ position: "relative", aspectRatio: "2/3", borderRadius: "var(--radius)", overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.12)" }}>
+      <main className="max-w-6xl mx-auto px-6 py-8 pb-16 grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-12 items-start">
+        {/* Cover */}
+        <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg max-w-[220px]">
           {book.cover_url ? (
-            <Image src={book.cover_url as string} alt={book.title as string} fill sizes="(max-width: 640px) 90vw, 220px" style={{ objectFit: "cover" }} priority />
+            <Image
+              src={book.cover_url as string}
+              alt={book.title as string}
+              fill
+              sizes="(max-width: 640px) 90vw, 220px"
+              className="object-cover"
+              priority
+            />
           ) : (
-            <div style={{ width: "100%", height: "100%", backgroundColor: "var(--color-border-muted)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: "var(--color-text-subtle)", fontSize: "var(--text-sm)" }}>Kein Cover</span>
+            <div className="w-full h-full bg-muted flex items-center justify-center">
+              <span className="text-sm text-muted-foreground">Kein Cover</span>
             </div>
           )}
         </div>
 
+        {/* Info */}
         <div>
           {book.is_indie && (
-            <span style={{ display: "inline-block", fontSize: "var(--text-xs)", color: "var(--color-accent)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "var(--space-3)" }}>Indie</span>
+            <Badge variant="outline" className="text-primary border-primary/40 mb-3">
+              Indie
+            </Badge>
           )}
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.5rem, 4vw, 2.25rem)", color: "var(--color-text)", marginBottom: "var(--space-2)", lineHeight: 1.15 }}>
+          <h1 className="font-serif text-[clamp(1.5rem,4vw,2.25rem)] text-foreground mb-2 leading-tight">
             {book.title as string}
           </h1>
-          {author && <p style={{ fontSize: "var(--text-lg)", color: "var(--color-text-muted)", marginBottom: "var(--space-6)" }}>{author}</p>}
+          {author && (
+            <p className="text-lg text-muted-foreground mb-6">{author}</p>
+          )}
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-4)", marginBottom: "var(--space-8)", paddingBottom: "var(--space-6)", borderBottom: "1px solid var(--color-border)" }}>
-            {book.publisher && <span style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}><span style={{ color: "var(--color-text-subtle)" }}>Verlag </span>{book.publisher as string}</span>}
-            {book.isbn13 && <span style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}><span style={{ color: "var(--color-text-subtle)" }}>ISBN </span>{book.isbn13 as string}</span>}
-            {book.availability && <span style={{ fontSize: "var(--text-sm)", color: book.availability === "lieferbar" ? "#2d7a4f" : "var(--color-text-muted)" }}>{book.availability as string}</span>}
-            {book.price && <span style={{ fontSize: "var(--text-sm)", color: "var(--color-text)" }}>{book.price} €</span>}
+          <div className="flex flex-wrap gap-4 mb-8 pb-6 border-b border-border">
+            {book.publisher && (
+              <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground/60">Verlag </span>
+                {book.publisher as string}
+              </span>
+            )}
+            {book.isbn13 && (
+              <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground/60">ISBN </span>
+                {book.isbn13 as string}
+              </span>
+            )}
+            {book.availability && (
+              <span className={`text-sm ${book.availability === "lieferbar" ? "text-primary" : "text-muted-foreground"}`}>
+                {book.availability as string}
+              </span>
+            )}
+            {book.price && (
+              <span className="text-sm text-foreground">{book.price} €</span>
+            )}
           </div>
 
           {book.isbn13 && affiliates.length > 0 && (
-            <div style={{ marginBottom: "var(--space-8)" }}>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "var(--space-3)" }}>Kaufen bei</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-3)" }}>
+            <div className="mb-8">
+              <p className="text-xs text-muted-foreground uppercase tracking-[0.1em] mb-3">Kaufen bei</p>
+              <div className="flex flex-wrap gap-3">
                 {affiliates.map((aff: any) => (
-                  <a key={aff.slug} href={aff.link_template.replace("{isbn13}", book.isbn13 as string)} target="_blank" rel="noopener noreferrer"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)", padding: "var(--space-2) var(--space-4)", backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "var(--radius)", fontSize: "var(--text-sm)", color: "var(--color-text)", transition: "border-color 0.15s" }}
-                    className="buy-btn">
-                    {aff.name} <span style={{ color: "var(--color-text-subtle)" }}>↗</span>
-                  </a>
+                  <Button key={aff.slug} variant="outline" size="sm" asChild>
+                    <a
+                      href={aff.link_template.replace("{isbn13}", book.isbn13 as string)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {aff.name} <span className="text-muted-foreground ml-1">↗</span>
+                    </a>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -124,20 +153,14 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
 
           {book.description && (
             <div>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "var(--space-3)" }}>Beschreibung</p>
-              <p style={{ fontSize: "var(--text-base)", color: "var(--color-text-muted)", lineHeight: 1.75, maxWidth: "60ch" }}>{book.description as string}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-[0.1em] mb-3">Beschreibung</p>
+              <p className="text-base text-muted-foreground leading-[1.75] max-w-[60ch]">
+                {book.description as string}
+              </p>
             </div>
           )}
         </div>
       </main>
-
-      <style>{`
-        .buy-btn:hover { border-color: var(--color-text-muted) !important; }
-        @media (max-width: 640px) {
-          .book-detail-layout { grid-template-columns: 1fr !important; }
-          .book-detail-layout > div:first-child { max-width: 180px; }
-        }
-      `}</style>
     </>
   );
 }

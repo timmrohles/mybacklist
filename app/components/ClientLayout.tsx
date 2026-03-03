@@ -15,9 +15,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <Header />
-      <div style={{ flex: 1 }}>
-        {children}
-      </div>
+      <div className="flex-1">{children}</div>
       <Footer />
     </>
   );

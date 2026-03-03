@@ -11,16 +11,17 @@ interface SortableRowProps {
 export default function SortableRow({ id, children }: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    backgroundColor: isDragging ? "var(--color-border-muted)" : undefined,
-  };
-
   return (
-    <tr ref={setNodeRef} style={style}>
-      <td style={{ padding: "var(--space-2) var(--space-3)", width: "32px", cursor: "grab", color: "var(--color-text-subtle)", fontSize: "var(--text-lg)", userSelect: "none" }} {...attributes} {...listeners}>
+    <tr
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={isDragging ? "opacity-50 bg-muted" : undefined}
+    >
+      <td
+        className="px-3 py-2 w-8 cursor-grab text-muted-foreground text-lg select-none"
+        {...attributes}
+        {...listeners}
+      >
         ⠿
       </td>
       {children}

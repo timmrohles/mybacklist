@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import SlideOver from "../../components/admin/SlideOver";
 
 type Book = {
@@ -14,6 +16,9 @@ type Book = {
 };
 
 const emptyForm = { title: "", author: "", isbn13: "", publisher: "", coverUrl: "", description: "", year: "", price: "" };
+
+const th = "px-4 py-3 text-left text-xs text-muted-foreground uppercase tracking-[0.08em] border-b border-border font-normal";
+const td = "px-4 py-3 text-sm text-muted-foreground border-b border-border";
 
 export default function AdminBuecherPage() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -75,9 +80,7 @@ export default function AdminBuecherPage() {
         body: JSON.stringify({ id: editing.id, ...form }),
       });
       const data = await res.json();
-      if (data.book) {
-        setBooks((prev) => prev.map((b) => b.id === data.book.id ? data.book : b));
-      }
+      if (data.book) setBooks((prev) => prev.map((b) => b.id === data.book.id ? data.book : b));
     } else {
       const res = await fetch("/api/admin/books", {
         method: "POST",
@@ -131,169 +134,172 @@ export default function AdminBuecherPage() {
     setToggling(null);
   }
 
-  const s: Record<string, React.CSSProperties> = {
-    page: { minHeight: "100vh", backgroundColor: "#f4f4f0", padding: "var(--space-8) var(--space-6)" },
-    wrap: { maxWidth: "960px", margin: "0 auto" },
-    h1: { fontFamily: "var(--font-display)", fontSize: "var(--text-2xl)", color: "var(--color-text)", margin: 0 },
-    btn: { padding: "var(--space-2) var(--space-4)", backgroundColor: "var(--color-text)", color: "var(--color-surface)", border: "none", borderRadius: "var(--radius)", fontSize: "var(--text-sm)", cursor: "pointer" },
-    btnOutline: { padding: "var(--space-2) var(--space-4)", backgroundColor: "transparent", color: "var(--color-text)", border: "1px solid var(--color-border)", borderRadius: "var(--radius)", fontSize: "var(--text-sm)", cursor: "pointer" },
-    input: { width: "100%", padding: "var(--space-2) var(--space-3)", border: "1px solid var(--color-border)", borderRadius: "var(--radius)", fontSize: "var(--text-sm)", backgroundColor: "var(--color-surface)", color: "var(--color-text)", marginBottom: "var(--space-3)" },
-    label: { display: "block", fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", marginBottom: "var(--space-1)", textTransform: "uppercase" as const, letterSpacing: "0.06em" },
-    table: { width: "100%", borderCollapse: "collapse" as const, backgroundColor: "var(--color-surface)", borderRadius: "var(--radius)", overflow: "hidden", border: "1px solid var(--color-border)" },
-    th: { padding: "var(--space-3) var(--space-4)", textAlign: "left" as const, fontSize: "var(--text-xs)", color: "var(--color-text-subtle)", textTransform: "uppercase" as const, letterSpacing: "0.08em", borderBottom: "1px solid var(--color-border)" },
-    td: { padding: "var(--space-3) var(--space-4)", fontSize: "var(--text-sm)", color: "var(--color-text-muted)", borderBottom: "1px solid var(--color-border-muted)" },
-    iconBtn: { background: "none", border: "none", cursor: "pointer", padding: "var(--space-1) var(--space-2)", fontSize: "var(--text-base)", color: "var(--color-text-subtle)", lineHeight: 1 },
-  };
-  function tabStyle(active: boolean): React.CSSProperties {
-    return { padding: "var(--space-2) var(--space-4)", border: "none", borderBottom: active ? "2px solid var(--color-accent)" : "2px solid transparent", backgroundColor: "transparent", cursor: "pointer", fontSize: "var(--text-sm)", color: active ? "var(--color-accent)" : "var(--color-text-subtle)", fontWeight: active ? 600 : 400 };
-  }
-
   return (
-    <div style={s.page}>
-      <div style={s.wrap}>
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-6)" }}>
-          <h1 style={s.h1}>Bücher</h1>
-          <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "center" }}>
-            <button onClick={openNew} style={s.btn}>+ Neues Buch</button>
-            <a href="/admin" style={{ fontSize: "var(--text-sm)", color: "var(--color-text-subtle)" }}>← Dashboard</a>
+    <div className="min-h-screen bg-background py-8 px-6">
+      <div className="max-w-[960px] mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="font-serif text-2xl text-foreground">Bücher</h1>
+          <div className="flex gap-3 items-center">
+            <Button size="sm" onClick={openNew}>+ Neues Buch</Button>
+            <a href="/admin" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← Dashboard</a>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: "1px solid var(--color-border)", marginBottom: "var(--space-4)" }}>
-          <button style={tabStyle(tab === "active")} onClick={() => setTab("active")}>Aktiv</button>
-          <button style={tabStyle(tab === "trash")} onClick={() => setTab("trash")}>Papierkorb</button>
+        <div className="flex border-b border-border mb-4">
+          {(["active", "trash"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`px-4 py-2 text-sm border-b-2 transition-colors cursor-pointer bg-transparent ${tab === t ? "border-primary text-foreground font-medium" : "border-transparent text-muted-foreground"}`}
+            >
+              {t === "active" ? "Aktiv" : "Papierkorb"}
+            </button>
+          ))}
         </div>
 
-        {/* Search (active only) */}
         {tab === "active" && (
-          <form onSubmit={(e) => { e.preventDefault(); fetchBooks(search); }} style={{ display: "flex", gap: "var(--space-3)", marginBottom: "var(--space-4)" }}>
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Titel, Autor oder ISBN suchen…" style={{ ...s.input, marginBottom: 0, flex: 1 }} />
-            <button type="submit" style={s.btn}>Suchen</button>
+          <form onSubmit={(e) => { e.preventDefault(); fetchBooks(search); }} className="flex gap-3 mb-4">
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Titel, Autor oder ISBN suchen…"
+              className="flex-1"
+            />
+            <Button type="submit" size="sm">Suchen</Button>
           </form>
         )}
 
         {loading ? (
-          <p style={{ color: "var(--color-text-subtle)", fontSize: "var(--text-sm)" }}>Lade…</p>
+          <p className="text-sm text-muted-foreground">Lade…</p>
         ) : tab === "active" ? (
-          <table style={s.table}>
-            <thead>
-              <tr>
-                <th style={{ ...s.th, width: "48px" }}>Cover</th>
-                <th style={s.th}>Titel</th>
-                <th style={s.th}>Autor</th>
-                <th style={s.th}>ISBN-13</th>
-                <th style={s.th}>Featured</th>
-                <th style={s.th}>Aktionen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {books.map((book) => (
-                <tr key={book.id}>
-                  <td style={s.td}>
-                    {book.cover_url ? (
-                      <img src={book.cover_url} alt="" style={{ width: "32px", height: "44px", objectFit: "cover", borderRadius: "2px" }} />
-                    ) : (
-                      <div style={{ width: "32px", height: "44px", backgroundColor: "var(--color-border)", borderRadius: "2px" }} />
-                    )}
-                  </td>
-                  <td style={s.td}>
-                    <a href={`/buch/${book.id}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-text)", textDecoration: "none" }}>
-                      {book.title}
-                    </a>
-                  </td>
-                  <td style={s.td}>{book.author ?? "–"}</td>
-                  <td style={{ ...s.td, fontFamily: "monospace", fontSize: "var(--text-xs)" }}>{book.isbn13 ?? "–"}</td>
-                  <td style={s.td}>
-                    <button
-                      onClick={() => toggleFeatured(book.id, book.is_featured)}
-                      disabled={toggling === book.id}
-                      style={{ padding: "var(--space-1) var(--space-3)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", fontSize: "var(--text-xs)", cursor: "pointer", backgroundColor: book.is_featured ? "var(--color-accent)" : "var(--color-surface)", color: book.is_featured ? "#fff" : "var(--color-text-muted)", transition: "all 0.15s" }}
-                    >
-                      {toggling === book.id ? "…" : book.is_featured ? "★ Featured" : "☆ Setzen"}
-                    </button>
-                  </td>
-                  <td style={s.td}>
-                    <div style={{ display: "flex", gap: "var(--space-1)" }}>
-                      <button onClick={() => openEdit(book)} style={s.iconBtn} title="Bearbeiten">✏️</button>
-                      <button onClick={() => copyBook(book.id)} style={s.iconBtn} title="Kopieren">⧉</button>
-                      <button onClick={() => softDelete(book.id)} style={s.iconBtn} title="Löschen">🗑️</button>
-                    </div>
-                  </td>
+          <div className="border border-border rounded-lg overflow-hidden">
+            <table className="w-full border-collapse bg-card">
+              <thead>
+                <tr>
+                  <th className={`${th} w-12`}>Cover</th>
+                  <th className={th}>Titel</th>
+                  <th className={th}>Autor</th>
+                  <th className={th}>ISBN-13</th>
+                  <th className={th}>Featured</th>
+                  <th className={th}>Aktionen</th>
                 </tr>
-              ))}
-              {books.length === 0 && (
-                <tr><td colSpan={6} style={{ ...s.td, textAlign: "center", color: "var(--color-text-subtle)" }}>Keine Bücher gefunden.</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {books.map((book) => (
+                  <tr key={book.id}>
+                    <td className={td}>
+                      {book.cover_url ? (
+                        <img src={book.cover_url} alt="" className="w-8 h-11 object-cover rounded-sm" />
+                      ) : (
+                        <div className="w-8 h-11 bg-border rounded-sm" />
+                      )}
+                    </td>
+                    <td className={td}>
+                      <a href={`/buch/${book.id}`} target="_blank" rel="noopener noreferrer" className="text-foreground hover:text-primary transition-colors">
+                        {book.title}
+                      </a>
+                    </td>
+                    <td className={td}>{book.author ?? "–"}</td>
+                    <td className={`${td} font-mono text-xs`}>{book.isbn13 ?? "–"}</td>
+                    <td className={td}>
+                      <button
+                        onClick={() => toggleFeatured(book.id, book.is_featured)}
+                        disabled={toggling === book.id}
+                        className={`px-3 py-0.5 border border-border rounded text-xs cursor-pointer transition-colors ${book.is_featured ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
+                      >
+                        {toggling === book.id ? "…" : book.is_featured ? "★ Featured" : "☆ Setzen"}
+                      </button>
+                    </td>
+                    <td className={td}>
+                      <div className="flex gap-1">
+                        <button onClick={() => openEdit(book)} className="bg-transparent border-none cursor-pointer px-2 py-1 text-muted-foreground hover:text-foreground transition-colors" title="Bearbeiten">✏️</button>
+                        <button onClick={() => copyBook(book.id)} className="bg-transparent border-none cursor-pointer px-2 py-1 text-muted-foreground hover:text-foreground transition-colors" title="Kopieren">⧉</button>
+                        <button onClick={() => softDelete(book.id)} className="bg-transparent border-none cursor-pointer px-2 py-1 text-muted-foreground hover:text-foreground transition-colors" title="Löschen">🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {books.length === 0 && (
+                  <tr><td colSpan={6} className={`${td} text-center text-muted-foreground`}>Keine Bücher gefunden.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <table style={s.table}>
-            <thead>
-              <tr>
-                <th style={s.th}>Titel</th>
-                <th style={s.th}>Autor</th>
-                <th style={s.th}>Gelöscht am</th>
-                <th style={s.th}>Aktionen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {trash.map((book) => (
-                <tr key={book.id}>
-                  <td style={s.td}>{book.title}</td>
-                  <td style={s.td}>{book.author ?? "–"}</td>
-                  <td style={{ ...s.td, fontSize: "var(--text-xs)" }}>{book.deleted_at ? new Date(book.deleted_at).toLocaleDateString("de-DE") : "–"}</td>
-                  <td style={s.td}>
-                    <button onClick={() => restore(book.id)} style={s.btnOutline}>Wiederherstellen</button>
-                  </td>
+          <div className="border border-border rounded-lg overflow-hidden">
+            <table className="w-full border-collapse bg-card">
+              <thead>
+                <tr>
+                  <th className={th}>Titel</th>
+                  <th className={th}>Autor</th>
+                  <th className={th}>Gelöscht am</th>
+                  <th className={th}>Aktionen</th>
                 </tr>
-              ))}
-              {trash.length === 0 && (
-                <tr><td colSpan={4} style={{ ...s.td, textAlign: "center", color: "var(--color-text-subtle)" }}>Papierkorb ist leer.</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {trash.map((book) => (
+                  <tr key={book.id}>
+                    <td className={td}>{book.title}</td>
+                    <td className={td}>{book.author ?? "–"}</td>
+                    <td className={`${td} text-xs`}>{book.deleted_at ? new Date(book.deleted_at).toLocaleDateString("de-DE") : "–"}</td>
+                    <td className={td}>
+                      <Button variant="outline" size="sm" onClick={() => restore(book.id)}>Wiederherstellen</Button>
+                    </td>
+                  </tr>
+                ))}
+                {trash.length === 0 && (
+                  <tr><td colSpan={4} className={`${td} text-center text-muted-foreground`}>Papierkorb ist leer.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* SlideOver */}
       <SlideOver open={slideOpen} onClose={() => setSlideOpen(false)} title={editing ? "Buch bearbeiten" : "Neues Buch"}>
-        <div>
-          <label style={s.label}>Titel *</label>
-          <input style={s.input} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Buchtitel" />
-
-          <label style={s.label}>Autor</label>
-          <input style={s.input} value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} placeholder="Autor" />
-
-          <label style={s.label}>ISBN-13</label>
-          <input style={s.input} value={form.isbn13} onChange={(e) => setForm({ ...form, isbn13: e.target.value })} placeholder="978…" />
-
-          <label style={s.label}>Verlag</label>
-          <input style={s.input} value={form.publisher} onChange={(e) => setForm({ ...form, publisher: e.target.value })} placeholder="Verlagsname" />
-
-          <label style={s.label}>Cover-URL</label>
-          <input style={s.input} value={form.coverUrl} onChange={(e) => setForm({ ...form, coverUrl: e.target.value })} placeholder="https://…" />
-
-          <label style={s.label}>Jahr</label>
-          <input style={s.input} value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} placeholder="2024" />
-
-          <label style={s.label}>Preis</label>
-          <input style={s.input} value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="18.99" />
-
-          <label style={s.label}>Beschreibung</label>
-          <textarea
-            style={{ ...s.input, minHeight: "100px", resize: "vertical" }}
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            placeholder="Kurzbeschreibung…"
-          />
-
-          <div style={{ display: "flex", gap: "var(--space-3)", marginTop: "var(--space-4)" }}>
-            <button onClick={saveBook} disabled={saving || !form.title} style={{ ...s.btn, flex: 1, opacity: saving || !form.title ? 0.6 : 1 }}>
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="block text-xs text-muted-foreground uppercase tracking-[0.06em] mb-1">Titel *</label>
+            <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Buchtitel" />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground uppercase tracking-[0.06em] mb-1">Autor</label>
+            <Input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} placeholder="Autor" />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground uppercase tracking-[0.06em] mb-1">ISBN-13</label>
+            <Input value={form.isbn13} onChange={(e) => setForm({ ...form, isbn13: e.target.value })} placeholder="978…" />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground uppercase tracking-[0.06em] mb-1">Verlag</label>
+            <Input value={form.publisher} onChange={(e) => setForm({ ...form, publisher: e.target.value })} placeholder="Verlagsname" />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground uppercase tracking-[0.06em] mb-1">Cover-URL</label>
+            <Input value={form.coverUrl} onChange={(e) => setForm({ ...form, coverUrl: e.target.value })} placeholder="https://…" />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground uppercase tracking-[0.06em] mb-1">Jahr</label>
+            <Input value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} placeholder="2024" />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground uppercase tracking-[0.06em] mb-1">Preis</label>
+            <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="18.99" />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground uppercase tracking-[0.06em] mb-1">Beschreibung</label>
+            <textarea
+              className="w-full min-h-[100px] resize-y px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Kurzbeschreibung…"
+            />
+          </div>
+          <div className="flex gap-3 mt-2">
+            <Button onClick={saveBook} disabled={saving || !form.title} className="flex-1">
               {saving ? "Speichern…" : "Speichern"}
-            </button>
-            <button onClick={() => setSlideOpen(false)} style={{ ...s.btnOutline, flex: 1 }}>Abbrechen</button>
+            </Button>
+            <Button variant="outline" onClick={() => setSlideOpen(false)} className="flex-1">Abbrechen</Button>
           </div>
         </div>
       </SlideOver>
