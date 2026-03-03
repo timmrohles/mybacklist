@@ -28,7 +28,7 @@ export default function HowItWorksSection() {
         <p className="text-xs text-foreground/50 uppercase tracking-[0.12em] mb-2">
           So funktioniert's
         </p>
-        <h2 className="font-serif text-[clamp(1.5rem,3vw,2rem)] text-foreground mb-12">
+        <h2 className="text-[clamp(1.5rem,3vw,2rem)] text-foreground mb-12 font-bold">
           Bücher finden. Bücher teilen.
         </h2>
         <div className="grid gap-10 md:grid-cols-3">
@@ -42,7 +42,7 @@ export default function HowItWorksSection() {
                   </span>
                   <Icon className="w-5 h-5 text-foreground/60" strokeWidth={1.5} />
                 </div>
-                <h3 className="font-serif text-xl text-foreground">{step.title}</h3>
+                <h3 className="text-xl text-foreground font-semibold">{step.title}</h3>
                 <p className="text-sm text-foreground/65 leading-relaxed">
                   {step.description}
                 </p>

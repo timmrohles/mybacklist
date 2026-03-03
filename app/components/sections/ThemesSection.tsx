@@ -13,7 +13,7 @@ export default function ThemesSection({ tags }: { tags: Tag[] }) {
     <section className="bg-stone-50 py-16">
       <div className="max-w-6xl mx-auto px-6">
         <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-2">Stöbern</p>
-        <h2 className="font-serif text-[clamp(1.5rem,3vw,2rem)] text-foreground mb-8">
+        <h2 className="text-[clamp(1.5rem,3vw,2rem)] text-foreground mb-8 font-bold">
           Bücher nach Thema
         </h2>
         <div className="flex flex-wrap gap-2 mb-6">

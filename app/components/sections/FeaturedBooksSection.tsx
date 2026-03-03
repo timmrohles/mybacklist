@@ -51,7 +51,7 @@ export default function FeaturedBooksSection({ books }: { books: Book[] }) {
             <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-2">
               Aktuelle Empfehlungen
             </p>
-            <h2 className="font-serif text-[clamp(1.5rem,3vw,2rem)] text-foreground">
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] text-foreground font-bold">
               Ausgewählte Bücher
             </h2>
           </div>

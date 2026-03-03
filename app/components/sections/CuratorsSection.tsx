@@ -56,7 +56,7 @@ export default function CuratorsSection({ curators }: { curators: Curator[] }) {
             <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-2">
               Menschen hinter den Empfehlungen
             </p>
-            <h2 className="font-serif text-[clamp(1.5rem,3vw,2rem)] text-foreground">
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] text-foreground font-bold">
               Unsere Kuratoren
             </h2>
           </div>

@@ -29,7 +29,7 @@ export default function PageBanner({
         {eyebrow && (
           <p className="text-xs text-white/60 uppercase tracking-[0.12em] mb-3">{eyebrow}</p>
         )}
-        <h1 className="font-serif text-[clamp(1.75rem,4vw,2.75rem)] text-white leading-[1.15] max-w-[36ch]">
+        <h1 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white leading-[1.15] max-w-[36ch] font-bold">
           {title}
         </h1>
         {subtitle && (
