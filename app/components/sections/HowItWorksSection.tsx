@@ -23,12 +23,12 @@ const steps = [
 
 export default function HowItWorksSection() {
   return (
-    <section className="py-16 bg-primary text-primary-foreground">
+    <section className="py-16 bg-[#f5f0e8]">
       <div className="max-w-6xl mx-auto px-6">
-        <p className="text-xs text-primary-foreground/60 uppercase tracking-[0.12em] mb-2">
+        <p className="text-xs text-foreground/50 uppercase tracking-[0.12em] mb-2">
           So funktioniert's
         </p>
-        <h2 className="font-serif text-[clamp(1.5rem,3vw,2rem)] mb-12">
+        <h2 className="font-serif text-[clamp(1.5rem,3vw,2rem)] text-foreground mb-12">
           Bücher finden. Bücher teilen.
         </h2>
         <div className="grid gap-10 md:grid-cols-3">
@@ -37,13 +37,13 @@ export default function HowItWorksSection() {
             return (
               <div key={i} className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-primary-foreground/40 font-mono tabular-nums">
+                  <span className="text-xs text-foreground/40 font-mono tabular-nums">
                     0{i + 1}
                   </span>
-                  <Icon className="w-5 h-5 text-primary-foreground/70" strokeWidth={1.5} />
+                  <Icon className="w-5 h-5 text-foreground/60" strokeWidth={1.5} />
                 </div>
-                <h3 className="font-serif text-xl">{step.title}</h3>
-                <p className="text-sm text-primary-foreground/70 leading-relaxed">
+                <h3 className="font-serif text-xl text-foreground">{step.title}</h3>
+                <p className="text-sm text-foreground/65 leading-relaxed">
                   {step.description}
                 </p>
               </div>

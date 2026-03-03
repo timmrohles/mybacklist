@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function HeroSection() {
   return (
-    <section className="bg-gradient-to-br from-[#0d3d3a] via-[#1a5c57] to-[#0f2f2c] py-24 px-6">
+    <section className="bg-[linear-gradient(135deg,#214a57_0%,#2e6d7c_50%,#457870_100%)] py-24 px-6">
       <div className="max-w-6xl mx-auto">
         <p className="text-xs text-white/60 uppercase tracking-[0.12em] mb-6">
           Kuratierte Buchempfehlungen
