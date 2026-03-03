@@ -18,9 +18,9 @@ export default function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-sm">
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-14">
-        <a href="/" className="font-serif text-xl text-foreground tracking-tight">
+        <a href="/" className="font-serif text-xl text-white tracking-tight">
           The Backlist Club
         </a>
 
@@ -32,9 +32,7 @@ export default function Header() {
               href={href}
               className={cn(
                 "text-sm transition-colors",
-                pathname.startsWith(href)
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                pathname.startsWith(href) ? "text-white" : "text-white/70 hover:text-white"
               )}
             >
               {label}
@@ -45,7 +43,12 @@ export default function Header() {
         {/* Mobile Menu */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="sm:hidden" aria-label="Menü öffnen">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="sm:hidden text-white hover:bg-white/10"
+              aria-label="Menü öffnen"
+            >
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>

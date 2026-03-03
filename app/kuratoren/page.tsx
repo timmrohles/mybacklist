@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { sql } from "@/lib/db";
 import type { Metadata } from "next";
+import Link from "next/link";
+import PageBanner from "@/app/components/sections/PageBanner";
 
 export const metadata: Metadata = {
   title: "Kuratoren",
@@ -21,23 +23,17 @@ export default async function KuratorenPage() {
 
   return (
     <>
-      <section className="max-w-6xl mx-auto px-6 py-12 pb-10">
-        <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-3">
-          Menschen hinter den Empfehlungen
-        </p>
-        <h1 className="font-serif text-[clamp(1.75rem,4vw,2.5rem)] text-foreground mb-3">
-          Unsere Kuratoren
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-[38rem]">
-          Echte Menschen mit echten Leseempfehlungen – keine Algorithmen.
-        </p>
-      </section>
+      <PageBanner
+        eyebrow="Menschen hinter den Empfehlungen"
+        title="Unsere Kuratoren"
+        subtitle="Echte Menschen mit echten Leseempfehlungen – keine Algorithmen."
+      />
 
-      <main className="max-w-6xl mx-auto px-6 pb-20 grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))] items-start">
+      <main className="max-w-6xl mx-auto px-6 py-12 pb-20 grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))] items-start">
         {curators.map((c: any) => {
           const avatarUrl = (c.avatar_url as string)?.startsWith("http") ? (c.avatar_url as string) : null;
           return (
-            <a
+            <Link
               key={c.id}
               href={`/kuratoren/${c.slug}`}
               className="block bg-card border border-border rounded-lg p-6 hover:border-muted-foreground transition-colors"
@@ -64,7 +60,7 @@ export default async function KuratorenPage() {
                   {c.bio as string}
                 </p>
               )}
-            </a>
+            </Link>
           );
         })}
       </main>

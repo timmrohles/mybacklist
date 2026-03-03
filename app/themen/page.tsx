@@ -1,5 +1,7 @@
 import { sql } from "@/lib/db";
 import type { Metadata } from "next";
+import Link from "next/link";
+import PageBanner from "@/app/components/sections/PageBanner";
 
 export const metadata: Metadata = {
   title: "Themen",
@@ -36,17 +38,13 @@ export default async function ThemenPage() {
 
   return (
     <>
-      <section className="max-w-6xl mx-auto px-6 py-12 pb-10">
-        <p className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-3">Entdecken</p>
-        <h1 className="font-serif text-[clamp(1.75rem,4vw,2.5rem)] text-foreground mb-3">
-          Bücher nach Thema
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-[38rem]">
-          Stöbere durch unsere kuratierten Themen und entdecke Bücher die zu dir passen.
-        </p>
-      </section>
+      <PageBanner
+        eyebrow="Entdecken"
+        title="Bücher nach Thema"
+        subtitle="Stöbere durch unsere kuratierten Themen und entdecke Bücher die zu dir passen."
+      />
 
-      <main className="max-w-6xl mx-auto px-6 pb-20 flex flex-col gap-12">
+      <main className="max-w-6xl mx-auto px-6 py-12 pb-20 flex flex-col gap-12">
         {sortedGroups.map((type) => (
           <section key={type}>
             <h2 className="text-xs text-muted-foreground uppercase tracking-[0.12em] mb-4">
@@ -54,7 +52,7 @@ export default async function ThemenPage() {
             </h2>
             <div className="flex flex-wrap gap-2">
               {grouped[type].map((tag: any) => (
-                <a
+                <Link
                   key={tag.id}
                   href={`/themen/${tag.slug}`}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm text-foreground hover:border-muted-foreground hover:text-primary transition-colors"
@@ -65,7 +63,7 @@ export default async function ThemenPage() {
                       {(tag.book_count as number).toLocaleString("de-DE")}
                     </span>
                   )}
-                </a>
+                </Link>
               ))}
             </div>
           </section>

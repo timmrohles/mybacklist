@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import PageBanner from "@/app/components/sections/PageBanner";
 
 async function getBook(id: string) {
   const [book] = await sql`
@@ -70,13 +71,14 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <div className="max-w-6xl mx-auto px-6 pt-4">
-        <a href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-          ← Alle Bücher
-        </a>
-      </div>
+      <PageBanner
+        title={book.title as string}
+        subtitle={author ?? undefined}
+        backHref="/"
+        backLabel="← Alle Bücher"
+      />
 
-      <main className="max-w-6xl mx-auto px-6 py-8 pb-16 grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-12 items-start">
+      <main className="max-w-6xl mx-auto px-6 py-10 pb-16 grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-12 items-start">
         {/* Cover */}
         <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg max-w-[220px]">
           {book.cover_url ? (
@@ -102,14 +104,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
               Indie
             </Badge>
           )}
-          <h1 className="font-serif text-[clamp(1.5rem,4vw,2.25rem)] text-foreground mb-2 leading-tight">
-            {book.title as string}
-          </h1>
-          {author && (
-            <p className="text-lg text-muted-foreground mb-6">{author}</p>
-          )}
-
-          <div className="flex flex-wrap gap-4 mb-8 pb-6 border-b border-border">
+          <div className="flex flex-wrap gap-4 mb-6 pb-6 border-b border-border">
             {book.publisher && (
               <span className="text-sm text-muted-foreground">
                 <span className="text-muted-foreground/60">Verlag </span>

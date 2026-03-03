@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Separator } from "@/components/ui/separator";
+import PageBanner from "@/app/components/sections/PageBanner";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -35,20 +35,22 @@ const faqs = [
 
 export default function FaqPage() {
   return (
-    <main className="max-w-[42rem] mx-auto px-6 py-12 pb-20">
-      <h1 className="font-serif text-3xl text-foreground mb-8">Häufige Fragen</h1>
+    <>
+      <PageBanner title="Häufige Fragen" />
 
-      <div className="flex flex-col gap-1">
-        {faqs.map((faq, i) => (
-          <details key={i} className="border-b border-border py-4 group">
-            <summary className="font-serif text-lg text-foreground cursor-pointer list-none flex justify-between items-center select-none">
-              {faq.q}
-              <span className="text-muted-foreground text-xl font-light ml-4 shrink-0">+</span>
-            </summary>
-            <p className="mt-3 text-base text-muted-foreground leading-[1.75]">{faq.a}</p>
-          </details>
-        ))}
-      </div>
-    </main>
+      <main className="max-w-[42rem] mx-auto px-6 py-12 pb-20">
+        <div className="flex flex-col gap-1">
+          {faqs.map((faq, i) => (
+            <details key={i} className="border-b border-border py-4 group">
+              <summary className="font-serif text-lg text-foreground cursor-pointer list-none flex justify-between items-center select-none">
+                {faq.q}
+                <span className="text-muted-foreground text-xl font-light ml-4 shrink-0">+</span>
+              </summary>
+              <p className="mt-3 text-base text-muted-foreground leading-[1.75]">{faq.a}</p>
+            </details>
+          ))}
+        </div>
+      </main>
+    </>
   );
 }
