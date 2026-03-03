@@ -200,6 +200,11 @@ HMAC_SECRET
 - [ ] Kuratoren-Login + Dashboard
 - [ ] Provisions-Übersicht + Auszahlung
 
+### EXTERNE ANTRÄGE (je früher, desto besser)
+
+- [ ] **Awin Publisher-Netzwerk-Antrag stellen** — Voraussetzung für Phase 2 (Bearbeitungszeit: 2–4 Wochen + Rückfragen). Nicht als Standard-Publisher, sondern explizit als "Publisher-Netzwerk" / Sub-Netzwerk beantragen.
+- [ ] **VLB Datenbezieher-Account beantragen** — Voraussetzung für Buchkatalog-Skalierung. Gibt Zugang zu 1,5 Mio. deutschsprachigen Titeln inkl. aktueller Preise, Beschreibungen und Cover in hoher Auflösung. Kosten: typisch einige hundert Euro/Jahr für kleine Publisher, Preise auf Anfrage.
+
 ---
 
 ## Affiliate-Partner (recherchiert März 2026)
